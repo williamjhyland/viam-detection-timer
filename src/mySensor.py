@@ -63,6 +63,7 @@ class MySensor(Sensor):
     async def get_readings(self, extra: Optional[Dict[str, Any]] = None, **kwargs) -> Mapping[str, Any]:
         # Counters for the number of detections before and after the hold time
         after_or_equal_hold_time_count = 0
+        before_hold_time_count = 0
 
         # Get detections using the get_model_detection method
         detections = await self.get_model_detection(self.base_vision_name, self.base_camera_name)
@@ -89,12 +90,17 @@ class MySensor(Sensor):
             current_time = datetime.datetime.now()
             time_difference = (current_time - detection_time).total_seconds()
 
+
             # Count the detection based on the threshold
             if time_difference > self.hold_time_threshold:
                 after_or_equal_hold_time_count += 1
+            else:
+                before_hold_time_count += 1
 
 
         # Return the counts in the specified format
         return {
-            "pizzasExceedingHoldTime": after_or_equal_hold_time_count
+            "pizzasExceedingHoldTime": after_or_equal_hold_time_count,
+            "pizzasNotExceedingHoldTime": before_hold_time_count,
+            "totalPizzas": after_or_equal_hold_time_count + before_hold_time_count
         }
